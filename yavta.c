@@ -2181,11 +2181,6 @@ int main(int argc, char *argv[])
 	while (do_sleep_forever)
 		sleep(1000);
 
-	if (!do_capture) {
-		video_close(&dev);
-		return 0;
-	}
-
 	/* Set the compression quality. */
 	if (video_set_quality(&dev, quality) < 0) {
 		video_close(&dev);
