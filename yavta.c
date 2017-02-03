@@ -1420,7 +1420,8 @@ static int video_load_test_pattern(struct device *dev, const char *filename)
 	/* Load or generate the test pattern */
 	for (plane = 0; plane < dev->num_planes; plane++) {
 		size = dev->buffers[0].size[plane];
-		dev->pattern[plane] = malloc(size);
+		if (!dev->pattern[plane])
+			dev->pattern[plane] = malloc(size);
 		if (dev->pattern[plane] == NULL) {
 			ret = -ENOMEM;
 			goto done;
@@ -1631,6 +1632,8 @@ static int video_do_capture(struct device *dev, unsigned int nframes,
 	double bps;
 	double fps;
 	int ret;
+	char file[64];
+	static int fr = 0;
 
 	/* Start streaming. */
 	ret = video_enable(dev, 1);
@@ -1706,6 +1709,10 @@ static int video_do_capture(struct device *dev, unsigned int nframes,
 		if (i >= nframes - dev->nbufs && !do_requeue_last)
 			continue;
 
+
+		snprintf(file, sizeof(file), "./frame-%06d.bin", fr++ % 30);
+		printf("loading %s\n", file);
+		video_load_test_pattern(dev, file);
 		ret = video_queue_buffer(dev, buf.index, fill);
 		if (ret < 0) {
 			printf("Unable to requeue buffer: %s (%d).\n",
